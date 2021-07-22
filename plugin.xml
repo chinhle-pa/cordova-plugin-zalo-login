@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-zalo-login"
+        version="1.0.0">
+    <name>Zalo Login</name>
+    <description>
+        This is pcv plugin for Zalo in Cordova!
+    </description>
+    <preference name="APP_ID" default="2382863458001662740" />
+    <engines>
+        <engine name="cordova-android" version=">=7.0.0" />
+        <engine name="cordova-ios" version=">=5.0.0" />
+    </engines>
+    <!-- android -->
+    <platform name="android">
+        <js-module src="www/zalo.js" name="ZaloLoginPlugin">
+            <clobbers target="zaloLoginPlugin" />
+        </js-module>
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="ZaloLoginPlugin">
+                <param name="android-package" value="com.pcv.zalo.ZaloLoginPlugin" />
+                <!-- <param name="onload" value="true" /> -->
+            </feature>
+            <preference name="android-minSdkVersion" value="18" />
+        </config-file>
+
+        <config-file target="res/values/strings.xml" parent="/*">
+            <string name="appID">$APP_ID</string>
+        </config-file> 
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <meta-data android:name="com.zing.zalo.zalosdk.appID" android:value="@string/appID"/>
+            
+            <activity android:name="com.zing.zalo.zalosdk.oauth.BrowserLoginActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <data android:scheme="zalo-$APP_ID" />
+                </intent-filter>
+            </activity>
+        </config-file>
+
+        <!-- <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:name="com.zing.zalo.zalosdk.oauth.ZaloSDKApplication" />
+        </edit-config> -->
+
+        <framework src="com.zing.zalo.zalosdk:core:2.6.0329" />
+        <framework src="com.zing.zalo.zalosdk:auth:2.6.0329" />
+        <framework src="com.zing.zalo.zalosdk:openapi:2.6.0329" />
+        <source-file src="src/android/ZaloLoginPlugin.java" target-dir="src/com/pcv/zalo" />
+        <resource-file src="proguard-zalo.txt" target="proguard-zalo.txt"/>
+    </platform>
+</plugin>
