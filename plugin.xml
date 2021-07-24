@@ -7,7 +7,7 @@
     <description>
         This is pcv plugin for Zalo in Cordova!
     </description>
-    <preference name="APP_ID" default="2382863458001662740" />
+    <preference name="ZALO_APP_ID"/>
     <engines>
         <engine name="cordova-android" version=">=7.0.0" />
         <engine name="cordova-ios" version=">=5.0.0" />
@@ -26,7 +26,7 @@
         </config-file>
 
         <config-file target="res/values/strings.xml" parent="/*">
-            <string name="appID">$APP_ID</string>
+            <string name="appID">$ZALO_APP_ID</string>
         </config-file> 
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -37,7 +37,7 @@
                     <action android:name="android.intent.action.VIEW" />
                     <category android:name="android.intent.category.DEFAULT" />
                     <category android:name="android.intent.category.BROWSABLE" />
-                    <data android:scheme="zalo-$APP_ID" />
+                    <data android:scheme="zalo-$ZALO_APP_ID" />
                 </intent-filter>
             </activity>
         </config-file>
@@ -52,4 +52,28 @@
         <source-file src="src/android/ZaloLoginPlugin.java" target-dir="src/com/pcv/zalo" />
         <resource-file src="proguard-zalo.txt" target="proguard-zalo.txt"/>
     </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+        <js-module src="www/zalo.js" name="ZaloLoginPlugin">
+            <clobbers target="zaloLoginPlugin" />
+        </js-module>
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="ZaloLoginPlugin">
+                <param name="ios-package" value="ZaloLoginPlugin" />
+            </feature>
+            <plugin name="ZaloLoginPlugin" value="ZaloLoginPlugin"/>
+        </config-file>
+
+        <header-file src="src/ios/ZaloLoginPlugin.h" />
+        <source-file src="src/ios/ZaloLoginPlugin.m" />
+
+        <config-file target="*-Info.plist" parent="appID">
+            <string>$ZALO_APP_ID</string>
+        </config-file>
+        <framework src="ZaloSDK" type="podspec" />
+    </platform>
+
+    <!-- after_prepare hook to populate APP_ID -->
+    <hook type="after_prepare" src="scripts/after_prepare.js" />
 </plugin>
