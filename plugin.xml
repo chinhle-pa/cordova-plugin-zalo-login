@@ -42,9 +42,9 @@
             </activity>
         </config-file>
 
-        <!-- <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+        <edit-config xmlns:android="http://schemas.android.com/apk/res/android" file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
             <application android:name="com.zing.zalo.zalosdk.oauth.ZaloSDKApplication" />
-        </edit-config> -->
+        </edit-config>
 
         <framework src="com.zing.zalo.zalosdk:core:2.6.0329" />
         <framework src="com.zing.zalo.zalosdk:auth:2.6.0329" />
@@ -57,8 +57,9 @@
     <platform name="ios">
         <js-module src="www/zalo.js" name="ZaloLoginPlugin">
             <clobbers target="zaloLoginPlugin" />
+            <param name="onload" value="true" />
         </js-module>
-        <config-file target="res/xml/config.xml" parent="/*">
+        <config-file target="config.xml" parent="/*">
             <feature name="ZaloLoginPlugin">
                 <param name="ios-package" value="ZaloLoginPlugin" />
             </feature>
@@ -71,7 +72,28 @@
         <config-file target="*-Info.plist" parent="appID">
             <string>$ZALO_APP_ID</string>
         </config-file>
-        <framework src="ZaloSDK" type="podspec" />
+
+        <config-file target="*-Info.plist" parent="CFBundleURLTypes">
+            <array>
+                <dict>
+                    <key>CFBundleTypeRole</key>
+                    <string>Editor</string>
+                    <key>CFBundleURLName</key>
+                    <string>zalo</string>
+                    <key>CFBundleURLSchemes</key>
+                    <array>
+                        <string>zalo-$ZALO_APP_ID</string>
+                    </array>
+                </dict>
+            </array>
+            
+        </config-file>
+        
+        <podspec>
+            <pods use-frameworks="true">
+                <pod name="ZaloSDK" />
+            </pods>
+        </podspec>
     </platform>
 
     <!-- after_prepare hook to populate APP_ID -->
