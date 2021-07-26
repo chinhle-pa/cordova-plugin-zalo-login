@@ -19,21 +19,19 @@
 
 - (void)login:(CDVInvokedUrlCommand *)command {
     NSLog(@"Starting login");
-        [[ZaloSDK sharedInstance] authenticateZaloWithAuthenType:ZAZaloSDKAuthenTypeViaZaloAppOnly
+        [[ZaloSDK sharedInstance] authenticateZaloWithAuthenType:ZAZAloSDKAuthenTypeViaZaloAppAndWebView
                             parentController:[self topMostController]                        //controller hiện form đăng nhập
                             handler:^(ZOOauthResponseObject *response) { //callback kết quả đăng nhập
             if([response isSucess]) {
             // đăng nhập thành công
-                NSString *oauthCode = response.oauthCode;
-                NSLog(@"%@ chinhle ma:", oauthCode);
+                // NSString *oauthCode = response.oauthCode;
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                          messageAsDictionary:[self responseObject]];
+                                                          messageAsDictionary:[self createResponseObject:response]];
                 [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             // có thể dùng oauth code này để verify lại từ server của ứng dụng
             } else if(response.errorCode != kZaloSDKErrorCodeUserCancel) {
             //lỗi đăng nhập
-                NSLog(@"%ld chinh le error", response.errorCode);
-                NSString *errorMessage = error.userInfo[FBSDKErrorLocalizedDescriptionKey] ?: @"There was a problem logging you in.";
+                NSString *errorMessage = [NSString stringWithFormat: @"%ld",response.errorCode];
                 CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                                 messageAsString:errorMessage];
                 [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -41,26 +39,6 @@
             }
         }];
     // [self.commandDelegate runInBackground:^{
-    //     __block CDVPluginResult *pluginResult;
-    //     [[ZaloSDK sharedInstance] authenticateZaloWithAuthenType:ZAZaloSDKAuthenTypeViaZaloAppOnly
-    //                         parentController:[self topMostController]                        //controller hiện form đăng nhập
-    //                         handler:^(ZOOauthResponseObject *response) { //callback kết quả đăng nhập
-    //         if([response isSucess]) {
-    //         // đăng nhập thành công
-    //             NSString *oauthCode = response.oauthCode;
-    //             NSLog(@"%@", oauthCode);
-    //             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-    //                                                     messageAsDictionary:response];
-    //             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    //         // có thể dùng oauth code này để verify lại từ server của ứng dụng
-    //         } else if(response.errorCode != kZaloSDKErrorCodeUserCancel) {
-    //         //lỗi đăng nhập
-    //             NSLog(@"%ld", response.errorCode);
-    //             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-    //                                                     messageAsDictionary:response];
-    //             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    //         }
-    //     }];
     // }];
 }
 #pragma mark - Utility methods
@@ -73,32 +51,26 @@
 
     return topController;
 }
-- (NSDictionary *)responseObject {
-
+- (NSDictionary *) createResponseObject:(ZOOauthResponseObject *)response {
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-    // ZOOauthResponseObject *response = [ZOOauthResponseObject currentAccessToken];
 
-    // NSTimeInterval expiresTimeInterval = token.expirationDate.timeIntervalSinceNow;
-    // NSString *expiresIn = @"0";
-    // if (expiresTimeInterval > 0) {
-    //     expiresIn = [NSString stringWithFormat:@"%0.0f", expiresTimeInterval];
-    // }
+    if(response.errorCode >= 0){
+        result[@"status"] = @"connected";
+    } else {
+        result[@"status"] = @"error";
+    }
 
-
-    result[@"status"] = @"connected";
-    // result[@"authResponse"] = @{
-    //                               @"accessToken" : token.tokenString ? token.tokenString : @"",
-    //                               @"expiresIn" : expiresIn,
-    //                               @"secret" : @"...",
-    //                               @"session_key" : [NSNumber numberWithBool:YES],
-    //                               @"sig" : @"...",
-    //                               @"userID" : token.userID ? token.userID : @""
-    //                               };
-
-
+    result[@"authResponse"] = @{
+                                  @"errorCode" : [NSString stringWithFormat:@"%ld", response.errorCode],
+                                  @"errorMessage" : response.errorMessage ? response.errorMessage : @"",
+                                  @"oauthCode" : response.oauthCode ? response.oauthCode : @"",
+                                  @"userId" : response.userId ? response.userId : @"",
+                                  @"displayName" : response.displayName ? response.displayName : @"",
+                                  @"dob" : response.dob ? response.dob : @"",
+                                  @"gender": response.gender ? response.gender : @""
+                                  };
     return [result copy];
 }
-
 @end
 
 #pragma mark - AppDelegate Overrides

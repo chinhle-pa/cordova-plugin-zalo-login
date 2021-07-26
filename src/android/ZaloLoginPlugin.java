@@ -69,7 +69,7 @@ public class ZaloLoginPlugin extends CordovaPlugin {
         public void onAuthenError(int errorCode, String message) {
             // Đăng nhập thất bại..
             super.onAuthenError(errorCode, message);
-            loginContext.error(errorCode);
+            loginContext.error(new JSONObject("{"+ "\"status\": \"error\","+"\"errorCode\":"+errorCode+"}");
         };
     
         @Override
@@ -77,19 +77,7 @@ public class ZaloLoginPlugin extends CordovaPlugin {
             super.onGetOAuthComplete(response);
             String code = response.getOauthCode();
             //Đăng nhập thành công..
-            Toast.makeText(cordova.getActivity().getApplicationContext(), "chinhle login"+code, Toast.LENGTH_LONG).show();
-            String result = "{"
-                + "\"status\": \"success\","
-                + "\"OauthCode\": \""+code+"\","
-                + "\"authResponse\": {"
-                + "\"facebookAccessToken\": \"" + response.getFacebookAccessToken() + "\","
-                + "\"expiresIn\": \"" + response.getFacebookExpireTime() + "\","
-                + "\"session_key\": true,"
-                + "\"facebookAccessToken\": \"...\","
-                + "\"userID\": \"" + response.getuId() + "\""
-                + "}"
-                + "}";
-            loginContext.success(result);
+            loginContext.success(getResponse(response));
         };
     };
     @Override
@@ -116,5 +104,32 @@ public class ZaloLoginPlugin extends CordovaPlugin {
         // Set up the activity result callback to this class
         cordova.setActivityResultCallback(this);
         ZaloSDK.Instance.authenticate(cordova.getActivity(), LoginVia.APP_OR_WEB, listener);
+    }
+
+    /**
+     * Create a Zalo Response object that matches the one for the Javascript SDK
+     * @return JSONObject - the response object
+     */
+    public JSONObject getResponse(OauthResponse response) {
+        String result;
+        if (response.getuId()) {
+            result = "{"
+                + "\"status\": \"connected\","
+                + "\"authResponse\": {"
+                + "\"oauthCode\": \"" + response.getOauthCode() + "\","
+                + "\"userID\": \"" + response.getuId() + "\""
+                + "}"
+                + "}";
+        } else {
+            result = "{"
+                + "\"status\": \"unknown\""
+                + "}";
+        }
+        try {
+            return new JSONObject(result);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject();
     }
 }
