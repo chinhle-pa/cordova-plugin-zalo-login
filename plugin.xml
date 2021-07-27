@@ -42,9 +42,9 @@
             </activity>
         </config-file>
 
-        <edit-config xmlns:android="http://schemas.android.com/apk/res/android" file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+        <!-- <edit-config xmlns:android="http://schemas.android.com/apk/res/android" file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
             <application android:name="com.zing.zalo.zalosdk.oauth.ZaloSDKApplication" />
-        </edit-config>
+        </edit-config> -->
 
         <framework src="com.zing.zalo.zalosdk:core:2.6.0329" />
         <framework src="com.zing.zalo.zalosdk:auth:2.6.0329" />
