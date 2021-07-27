@@ -69,7 +69,12 @@ public class ZaloLoginPlugin extends CordovaPlugin {
         public void onAuthenError(int errorCode, String message) {
             // Đăng nhập thất bại..
             super.onAuthenError(errorCode, message);
-            loginContext.error(new JSONObject("{"+ "\"status\": \"error\","+"\"errorCode\":"+errorCode+"}");
+            try {
+                loginContext.error( new JSONObject("{"+ "\"status\": \"error\","+"\"errorCode\":"+errorCode+"}"));
+            } catch (JSONException e) {
+                loginContext.error(errorCode);
+                e.printStackTrace();
+            }
         };
     
         @Override
@@ -112,7 +117,7 @@ public class ZaloLoginPlugin extends CordovaPlugin {
      */
     public JSONObject getResponse(OauthResponse response) {
         String result;
-        if (response.getuId()) {
+        if (response.getuId()!=0) {
             result = "{"
                 + "\"status\": \"connected\","
                 + "\"authResponse\": {"
