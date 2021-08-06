@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-zalo-login",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "\n        This is pcv plugin for Zalo in Cordova!\n    ",
   "cordova": {
     "id": "cordova-plugin-zalo-login",
