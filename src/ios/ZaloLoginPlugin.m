@@ -24,7 +24,18 @@
                             handler:^(ZOOauthResponseObject *response) { //callback kết quả đăng nhập
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                           messageAsDictionary:[self createResponseObject:response]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            if([response isSucess]) {
+                // đăng nhập thành công
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                          messageAsDictionary:[self createResponseObject:response]];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } else {
+                //lỗi đăng nhập
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                          messageAsDictionary:[self createResponseObject:response]];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }
         }];
     // [self.commandDelegate runInBackground:^{
     // }];
