@@ -11,8 +11,8 @@
 @implementation ZaloLoginPlugin
 
 - (void)pluginInitialize {
-    NSLog(@"Starting Zalo Login plugin");
-    [[ZaloSDK sharedInstance] initializeWithAppId:@"2382863458001662740"];
+    // NSLog(@"Starting Zalo Login plugin");
+    [[ZaloSDK sharedInstance] initializeWithAppId:@"3552157261157599875"];
     }
 
 #pragma mark - Cordova commands
@@ -22,21 +22,9 @@
         [[ZaloSDK sharedInstance] authenticateZaloWithAuthenType:ZAZAloSDKAuthenTypeViaZaloAppAndWebView
                             parentController:[self topMostController]                        //controller hiện form đăng nhập
                             handler:^(ZOOauthResponseObject *response) { //callback kết quả đăng nhập
-            if([response isSucess]) {
-            // đăng nhập thành công
-                // NSString *oauthCode = response.oauthCode;
-                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                           messageAsDictionary:[self createResponseObject:response]];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            // có thể dùng oauth code này để verify lại từ server của ứng dụng
-            } else if(response.errorCode != kZaloSDKErrorCodeUserCancel) {
-            //lỗi đăng nhập
-                NSString *errorMessage = [NSString stringWithFormat: @"%ld",response.errorCode];
-                CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                                                messageAsString:errorMessage];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                return;
-            }
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }];
     // [self.commandDelegate runInBackground:^{
     // }];
@@ -78,4 +66,10 @@
 - (BOOL)application:(UIApplication *)application openURL:(nonnull NSURL *)url options:(nonnull NSDictionary<NSString *,id> *)options {
   return [[ZDKApplicationDelegate sharedInstance] application:application openURL:url options:options];
 }
+// - (BOOL)application:(UIApplication *)application
+//  didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+//     NSLog(@"Starting Zalo Login plugin");
+//     [[ZaloSDK sharedInstance] initializeWithAppId:kZALO_SDK_APP_ID];
+//     return YES;
+// }
 @end
