@@ -63,7 +63,7 @@
                                   @"errorCode" : [NSString stringWithFormat:@"%ld", response.errorCode],
                                   @"errorMessage" : response.errorMessage ? response.errorMessage : @"",
                                   @"oauthCode" : response.oauthCode ? response.oauthCode : @"",
-                                  @"userId" : response.userId ? response.userId : @"",
+                                  @"userID" : response.userId ? response.userId : @"",
                                   @"displayName" : response.displayName ? response.displayName : @"",
                                   @"dob" : response.dob ? response.dob : @"",
                                   @"gender": response.gender ? response.gender : @""
