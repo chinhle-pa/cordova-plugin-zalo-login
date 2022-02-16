@@ -46,9 +46,9 @@
             <application android:name="com.zing.zalo.zalosdk.oauth.ZaloSDKApplication" />
         </edit-config> -->
 
-        <framework src="com.zing.zalo.zalosdk:core:2.6.0329" />
-        <framework src="com.zing.zalo.zalosdk:auth:2.6.0329" />
-        <framework src="com.zing.zalo.zalosdk:openapi:2.6.0329" />
+        <framework src="me.zalo:sdk-core:+" />
+        <framework src="me.zalo:sdk-auth:+" />
+        <framework src="me.zalo:sdk-openapi:+" />
         <source-file src="src/android/ZaloLoginPlugin.java" target-dir="src/com/pcv/zalo" />
         <resource-file src="proguard-zalo.txt" target="proguard-zalo.txt"/>
     </platform>
