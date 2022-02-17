@@ -12,7 +12,10 @@
 
 - (void)pluginInitialize {
     // NSLog(@"Starting Zalo Login plugin");
-    [[ZaloSDK sharedInstance] initializeWithAppId:@"3552157261157599875"];
+    NSString *appVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+    NSString *appID = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"appID"];
+    NSLog(@"Zalo Login app ID = %@", appID);
+    [[ZaloSDK sharedInstance] initializeWithAppId:appID];
     }
 
 #pragma mark - Cordova commands

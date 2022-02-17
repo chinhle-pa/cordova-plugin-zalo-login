@@ -66,8 +66,9 @@
             <plugin name="ZaloLoginPlugin" value="ZaloLoginPlugin"/>
         </config-file>
 
-        <header-file src="src/ios/ZaloLoginPlugin.h" />
-        <source-file src="src/ios/ZaloLoginPlugin.m" />
+        <!-- <header-file src="src/ios/ZaloLoginPlugin.h" />
+        <source-file src="src/ios/ZaloLoginPlugin.m" /> -->
+        <source-file src="src/ios/ZaloLoginPlugin.swift" />
 
         <config-file target="*-Info.plist" parent="appID">
             <string>$ZALO_APP_ID</string>
@@ -91,7 +92,7 @@
         
         <podspec>
             <pods use-frameworks="true">
-                <pod name="ZaloSDK" />
+                <pod name="ZaloSDK" git="https://github.com/VNG-Zalo/ZaloSDK-iOS.git"/>
             </pods>
         </podspec>
     </platform>
