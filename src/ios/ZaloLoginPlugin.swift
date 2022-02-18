@@ -51,85 +51,92 @@ import ZaloSDK
         AuthenUtils.shared.renewPKCECode()
         ZaloSDK.sharedInstance().authenticateZalo(with: ZAZAloSDKAuthenTypeViaZaloAppAndWebView, parentController: self.viewController, codeChallenge: AuthenUtils.shared.getCodeChallenge(), extInfo: [
         "appVersion": "1.0.0",
-    ]) { (response) in
-            self.onAuthenticateComplete(with: response)
+    ]) { [self](response) in
+            self.onAuthenticateComplete(with: response, command: command)
         }
     }
 
-    func onAuthenticateComplete(with response: ZOOauthResponseObject?) {
-        // loadingIndicator.stopAnimating()
-        // loginButton.isHidden = false
-        
+    func onAuthenticateComplete(with response: ZOOauthResponseObject?, command: CDVInvokedUrlCommand) {
         if response?.isSucess == true {
-            getAccessTokenFromOAuthCode(response?.oauthCode);
+            getAccessTokenFromOAuthCode(response?.oauthCode, command: command);
         } else if let response = response,
-                response.errorCode != -1001 { // not cancel
+            response.errorCode != -1001 { // not cancel
             // showAlert(with: "Error \(response.errorCode)", message: response.errorMessage ?? "")
-            let toastController: UIAlertController =
-                UIAlertController(
-                title: "",
-                message: response.errorMessage,
-                preferredStyle: .alert
-                )
-            
-            self.viewController?.present(
-                toastController,
-                animated: true,
-                completion: nil
-            )
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                toastController.dismiss(
-                animated: true,
-                completion: nil
-                )
-            }
+            let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: createErrorResponseObject(response:response))
+            self.commandDelegate.send(result, callbackId: command.callbackId)
+            return
         }
     }
 
-    private func getAccessTokenFromOAuthCode(_ oauthCode: String?) {
-        ZaloSDK.sharedInstance().getAccessToken(withOAuthCode: oauthCode, codeVerifier: AuthenUtils.shared.getCodeVerifier()) { (tokenResponse) in
+    private func getAccessTokenFromOAuthCode(_ oauthCode: String?, command: CDVInvokedUrlCommand) {
+        ZaloSDK.sharedInstance().getAccessToken(withOAuthCode: oauthCode, codeVerifier: AuthenUtils.shared.getCodeVerifier()) {[self] (tokenResponse) in
             AuthenUtils.shared.saveTokenResponse(tokenResponse)
             if let tokenResponse = tokenResponse {
-                print("""
-                      getAccessTokenFromOAuthCode:
-                      accessToken: \(tokenResponse.accessToken ?? "")
-                      refreshToken: \(tokenResponse.refreshToken ?? "")
-                      expriedTime: \(tokenResponse.expriedTime)
-                      """)
-                // self.showMainController()
-            } else {
-                // showAlert(with: "Get AccessToken from OauthCode error \(tokenResponse?.errorCode ?? ZaloSDKErrorCode.sdkErrorCodeUnknownException.rawValue)", message: tokenResponse?.errorMessage ?? "")
-                let toastController: UIAlertController =
-                    UIAlertController(
-                    title: "",
-                    message: tokenResponse?.errorMessage,
-                    preferredStyle: .alert
-                    )
-                
-                self.viewController?.present(
-                    toastController,
-                    animated: true,
-                    completion: nil
-                )
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    toastController.dismiss(
-                    animated: true,
-                    completion: nil
-                    )
+                if let accessToken = tokenResponse.accessToken {
+                ZaloSDK.sharedInstance().getZaloUserProfile(withAccessToken: accessToken) { (response) in
+                    self.onLoad(profile: response, command: command)
                 }
+            }
+            } else {
+                showAlert(with: "Get AccessToken from OauthCode error \(tokenResponse?.errorCode ?? ZaloSDKErrorCode.sdkErrorCodeUnknownException.rawValue)", message: tokenResponse?.errorMessage ?? "")
+                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: createErrorResponseObject(response:tokenResponse))
+                self.commandDelegate.send(result, callbackId: command.callbackId)
+                return
             }
         }
     }
-    // private func showAlert(with title: String = "ZaloSDK", message: String) {
-    //     let controller = UIAlertController(title: title, message: message, preferredStyle: .alert)
-    //     let action = UIAlertAction(title: "OK", style: .default) { (action) in
-    //         controller.dismiss(animated: true, completion: nil)
-    //     }
-    //     controller.addAction(action)
-    //     self.present(controller, animated: true, completion: nil)
-    // }
+
+    func onLoad(profile: ZOGraphResponseObject?, command : CDVInvokedUrlCommand) {
+        guard let profile = profile,
+            profile.isSucess
+            else {
+                showAlert(with: "Error", message: "Get profile error")
+                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: createResponseObject(response:profile))
+                self.commandDelegate.send(result, callbackId: command.callbackId)
+                return
+            }
+
+            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: createResponseObject(response:profile))
+            self.commandDelegate.send(result, callbackId: command.callbackId)
+    }
+
+    private func createResponseObject(response: ZOGraphResponseObject?) -> [AnyHashable : Any]? {
+        var result: [AnyHashable : Any] = [:]
+
+        guard let profile = response,
+            profile.isSucess,
+            // let errorCode = profile.data["error"] as? String,
+            let name = profile.data["name"] as? String,
+            let id = profile.data["id"] as? String,
+            let message = profile.data["message"] as? String
+        else {
+            result["status"] = "error"
+            showAlert(with: "Error", message: (response!.data["error"] as! String))
+            return result
+        }
+        result["status"] = "connected"
+        result["authResponse"] = [
+            "message": message,
+            "userID": id,
+            "displayName": name
+        ]
+        
+        return result
+    }
+    private func createErrorResponseObject(response: Any?) ->  [AnyHashable : Any]? {
+        var result: [AnyHashable : Any] = [:]
+        result["status"] = "error"
+        return result
+    }
+
+    private func showAlert(with title: String = "ZaloSDK", message: String) {
+        let controller = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .default) { (action) in
+            controller.dismiss(animated: true, completion: nil)
+        }
+        controller.addAction(action)
+        self.viewController?.present(controller, animated: true, completion: nil)
+    }
 
 }
 
@@ -139,34 +146,10 @@ import ZaloSDK
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
- 
-        /// 0a. Init zalo sdk
-        // let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-        let appID = Bundle.main.infoDictionary?["appID"] as? String
-        ZaloSDK.sharedInstance().initialize(withAppId: appID)
-        return true
-    }
-
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         /// 0b. Receive callback from zalo
         return ZDKApplicationDelegate.sharedInstance().application(app, open: url, options: options)
     }
-
-    
-    // func _customNavigationBarForiOS15() {
-    //     if #available(iOS 15.0, *) {
-    //         let navigationBarAppearance = UINavigationBarAppearance()
-    //         navigationBarAppearance.configureWithDefaultBackground()
-    //         navigationBarAppearance.backgroundColor = UIColor(red: 0, green: 143.0/255.0, blue: 243.0/255.0, alpha: 255/255.0)
-    //         navigationBarAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.white]
-    //         UINavigationBar.appearance().tintColor = .white;
-    //         UINavigationBar.appearance().standardAppearance = navigationBarAppearance
-    //         UINavigationBar.appearance().compactAppearance = navigationBarAppearance
-    //         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
-    //     }
-
-    // }
 }
 
 enum UserDefaultsKeys: String, CaseIterable {
