@@ -109,7 +109,7 @@ public class ZaloLoginPlugin extends CordovaPlugin {
                         }, fields);
                           
                     } else {
-                        loginContext.error(getErrorResponse(data));
+                        loginContext.error(getResponse(data));
                     }
                 }
             });
