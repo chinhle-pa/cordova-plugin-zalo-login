@@ -101,7 +101,6 @@ public class ZaloLoginPlugin extends CordovaPlugin {
                         long expires_in = Long.parseLong(data.optString("expires_in"));
                         String[] fields = {"id"};
             
-                        //Store data token in app cache
                         ZaloSDK.Instance.getProfile( context, access_token, new ZaloOpenAPICallback(){
                             @Override
                             public void onResult(JSONObject response) {
@@ -109,6 +108,8 @@ public class ZaloLoginPlugin extends CordovaPlugin {
                             }
                         }, fields);
                           
+                    } else {
+                        loginContext.error(getErrorResponse(data));
                     }
                 }
             });
@@ -154,11 +155,11 @@ public class ZaloLoginPlugin extends CordovaPlugin {
      */
     public JSONObject getResponse(JSONObject response) {
         String result;
-        Context context = this.cordova.getActivity().getApplicationContext();
-        int duration = Toast.LENGTH_LONG;
+        // Context context = this.cordova.getActivity().getApplicationContext();
+        // int duration = Toast.LENGTH_LONG;
 
-        Toast toast = Toast.makeText(context, response.optString("id"), duration);
-        toast.show();
+        // Toast toast = Toast.makeText(context, response.optString("id"), duration);
+        // toast.show();
         
         if (response.optInt("error")==0) {
             result = "{"

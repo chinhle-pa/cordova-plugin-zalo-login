@@ -4,12 +4,21 @@
 
 ## Table of contents
 
+- [Release](#release)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Sample repo](#sample-repo)
 - [Compatibility](#compatibility)
 - [Zalo SDK](#zalo-sdk)
 - [API](#api)
+
+## Release (1.1.2)
+
+Update new ZaloSDK which for Zalo login v4.
+
+- iOS: https://developers.zalo.me/docs/sdk/ios-sdk-196
+
+- Android: https://developers.zalo.me/docs/sdk/android-sdk-203
 
 ## Installation
 
